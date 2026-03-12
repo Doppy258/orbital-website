@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Message — AI Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --black: #000000;
+      --surface: #0f0f0f;
+      --surface2: #141414;
+      --surface3: #1a1a1a;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.12);
+      --text: #ffffff;
+      --text-muted: rgba(255,255,255,0.55);
+      --text-dim: rgba(255,255,255,0.35);
+      --lime: #e8ff9c;
+      --lime-dim: rgba(232,255,156,0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--text);
+      font-family: 'Host Grotesk', sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(16px) saturate(150%);
+      -webkit-backdrop-filter: blur(16px) saturate(150%);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+
+    .nav-logo svg { flex-shrink: 0; }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: #fff; }
+
+    .nav-cta {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.0);
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .nav-cta:hover { background: rgba(255,255,255,0.08); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      /* Dark volcanic/mountain silhouette with dramatic lighting */
+      background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1440&q=85&auto=format&fit=crop&crop=center');
+      background-size: cover;
+      background-position: center 55%;
+      opacity: 1;
+      filter: brightness(0.22) saturate(0.1) contrast(1.1);
+    }
+
+    /* concentrated warm light beam — matches target's single light source */
+    .hero-beam {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 180px 260px at 50% 70%, rgba(215,200,170,0.28) 0%, rgba(195,180,150,0.10) 35%, transparent 65%),
+        radial-gradient(ellipse 60px 100px at 50% 75%, rgba(235,220,190,0.22) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .hero-grad {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.5) 0%,
+        rgba(0,0,0,0.05) 20%,
+        rgba(0,0,0,0.0) 50%,
+        rgba(0,0,0,0.55) 78%,
+        rgba(0,0,0,1) 100%
+      );
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 580px;
+      padding: 0 24px;
+    }
+
+    .hero-title {
+      font-size: clamp(42px, 5.5vw, 64px);
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      color: #fff;
+      margin: 0 0 20px;
+      font-style: italic;
+    }
+
+    .hero-subtitle {
+      font-size: 15px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.6;
+      max-width: 340px;
+      margin: 0 auto 36px;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      padding: 9px 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(8px);
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .hero-cta:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.4); }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      font-size: 11px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.06em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── SECTION LABELS ── */
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+    .section-label::before {
+      content: '←';
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+    }
+
+    /* ── SECTION BASE ── */
+    .section {
+      padding: 96px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-full {
+      padding: 96px 0;
+    }
+
+    /* ── HEADING STYLES ── */
+    .h1 {
+      font-size: clamp(36px, 4vw, 52px);
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 1.08;
+      color: #fff;
+      margin: 0 0 24px;
+    }
+
+    .h2 {
+      font-size: clamp(30px, 3.5vw, 44px);
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: #fff;
+      margin: 0 0 16px;
+    }
+
+    .h3 {
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      color: #fff;
+      margin: 0 0 10px;
+    }
+
+    .body-text {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.65;
+    }
+
+    /* ── ITALIC ACCENT ── */
+    em {
+      font-style: italic;
+      color: rgba(255,255,255,0.85);
+    }
+
+    /* ── PILL BUTTON ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 20px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-outline {
+      border: 1px solid rgba(255,255,255,0.2);
+      background: transparent;
+      color: #fff;
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.35); }
+
+    .btn-light {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+    }
+    .btn-light:hover { background: rgba(255,255,255,0.13); }
+
+    .btn-white {
+      background: #fff;
+      color: #000;
+      font-weight: 600;
+    }
+    .btn-white:hover { background: rgba(255,255,255,0.9); }
+
+    /* ── CARD ── */
+    .card {
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 24px;
+      transition: border-color 0.3s;
+    }
+    .card:hover { border-color: rgba(255,255,255,0.1); }
+
+    /* ── FEATURE SECTION ── */
+    .feature-bg {
+      background: #000;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── APP MOCKUP ── */
+    .mockup-window {
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .mockup-titlebar {
+      height: 36px;
+      background: #161616;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 6px;
+    }
+
+    .dot { width: 9px; height: 9px; border-radius: 50%; }
+
+    /* ── CHAT BUBBLE ── */
+    .chat-msg {
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      line-height: 1.5;
+      max-width: 85%;
+    }
+    .chat-user {
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.8);
+      align-self: flex-end;
+      border-radius: 12px 12px 2px 12px;
+    }
+    .chat-ai {
+      background: var(--surface3);
+      color: rgba(255,255,255,0.75);
+      align-self: flex-start;
+      border-radius: 12px 12px 12px 2px;
+      border: 1px solid var(--border);
+    }
+
+    /* ── TABS ── */
+    .tab-btn {
+      padding: 7px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: transparent;
+      color: rgba(255,255,255,0.4);
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+
+    /* ── STEP ITEM ── */
+    .step {
+      display: flex;
+      gap: 16px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.3);
+      min-width: 20px;
+      padding-top: 2px;
+    }
+
+    /* ── PRICING CARDS ── */
+    .pricing-card {
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: 32px 28px;
+      position: relative;
+    }
+    .pricing-card.popular {
+      border-color: rgba(255,255,255,0.15);
+      background: #161616;
+    }
+    .popular-badge {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      color: #000;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 12px;
+      border-radius: 999px;
+    }
+
+    .price-amount {
+      font-size: 42px;
+      font-weight: 300;
+      letter-spacing: -0.04em;
+      color: #fff;
+      line-height: 1;
+    }
+    .price-period {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .feature-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 10px;
+    }
+    .feature-check::before {
+      content: '✓';
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── FAQ ── */
+    details {
+      border-bottom: 1px solid var(--border);
+    }
+    details > summary {
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.8);
+    }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary .faq-icon {
+      width: 20px; height: 20px;
+      flex-shrink: 0;
+      color: rgba(255,255,255,0.3);
+      font-size: 18px;
+      line-height: 1;
+      transition: transform 0.2s;
+    }
+    details[open] > summary .faq-icon { transform: rotate(45deg); }
+    details > summary:hover { color: #fff; }
+    .faq-answer {
+      padding-bottom: 20px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.7;
+    }
+
+    /* ── TESTIMONIAL ── */
+    .test-card {
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 28px;
+      transition: border-color 0.3s;
+    }
+    .test-card:hover { border-color: rgba(255,255,255,0.1); }
+
+    .test-text {
+      font-size: 14px;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .test-author {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 2px;
+    }
+
+    .test-role {
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+    }
+
+    /* ── CTA BOTTOM ── */
+    .cta-section {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      margin: 0 40px 80px;
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 40px;
+    }
+
+    .cta-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1400&q=80&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center 60%;
+      opacity: 0.4;
+      filter: brightness(0.6) saturate(0.3);
+    }
+
+    .cta-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.8) 100%);
+    }
+
+    /* ── TOGGLE ── */
+    .toggle-pill {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      padding: 7px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: transparent;
+      transition: all 0.2s;
+    }
+    .toggle-pill.active {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.2);
+      color: #fff;
+    }
+    .toggle-pill:hover { color: rgba(255,255,255,0.8); }
+
+    /* ── DIVIDER ── */
+    hr { border: none; border-top: 1px solid var(--border); }
+
+    /* ── ICON GRID ── */
+    .icon-box {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: rgba(255,255,255,0.55);
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 60px 40px 40px;
+    }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.in { opacity: 1; transform: none; }
+    .reveal-d1 { transition-delay: 0.1s; }
+    .reveal-d2 { transition-delay: 0.2s; }
+    .reveal-d3 { transition-delay: 0.3s; }
+
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .section { padding: 80px 24px; }
+      .cta-section { margin: 0 20px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════ NAV -->
+<nav class="nav">
+  <a class="nav-logo" href="#">
+    <!-- Message icon -->
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <rect width="18" height="18" rx="5" fill="rgba(255,255,255,0.1)"/>
+      <path d="M4 6h10M4 9h7M4 12h5" stroke="rgba(255,255,255,0.7)" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>
+    Message
+  </a>
+
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#features">Features</a>
+    <a href="#testimonials">Testimonials</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+  </div>
+
+  <a href="#" class="nav-cta">Get Started</a>
+</nav>
+
+
+<!-- ══════════════════════════════════════════ HERO -->
+<section class="hero" id="about">
+  <div class="hero-bg"></div>
+  <div class="hero-beam"></div>
+  <div class="hero-grad"></div>
+
+  <div class="hero-content">
+    <h1 class="hero-title">Where thoughts<br>become actions.</h1>
+    <p class="hero-subtitle">An AI companion that sharpens clarity, captures ideas, and guides your every move.</p>
+    <a href="#" class="hero-cta">Begin Journey</a>
+  </div>
+
+  <div class="hero-scroll">
+    <svg width="12" height="16" viewBox="0 0 12 16" fill="none">
+      <path d="M6 2v10M2 10l4 4 4-4" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Scroll to explore
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ FEATURES (Introducing) -->
+<section class="feature-bg" id="features">
+  <div class="section">
+
+    <!-- Label -->
+    <div class="section-label reveal">Introducing Message</div>
+
+    <!-- Headline -->
+    <h2 class="h1 reveal" style="max-width:640px;">
+      Harness invisible power to <em>write faster, focus deeper,</em> and save hours.
+    </h2>
+
+    <!-- Two-column layout: mockup left, chat right -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:48px 0 48px;align-items:start;">
+
+      <!-- Left: App UI mockup -->
+      <div class="mockup-window reveal">
+        <div class="mockup-titlebar">
+          <div class="dot" style="background:#ff5f57;"></div>
+          <div class="dot" style="background:#febc2e;"></div>
+          <div class="dot" style="background:#28c840;"></div>
+          <span style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.2);">message.ai</span>
+        </div>
+        <div style="padding:20px 18px;">
+          <!-- Trigger buttons -->
+          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.5;"><path d="M8 1L2 8h5l-1 5 6-7H7L8 1z" stroke="rgba(255,255,255,0.7)" stroke-width="1.2" stroke-linejoin="round"/></svg>
+              <span style="font-size:12px;color:rgba(255,255,255,0.55);">SMS-ish Trigger</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:10px;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;"><path d="M9.5 2.5l2 2-7 7H2.5v-2l7-7z" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-linejoin="round"/></svg>
+              <span style="font-size:12px;color:rgba(255,255,255,0.8);">Write without limits</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.5;"><circle cx="7" cy="7" r="5.5" stroke="rgba(255,255,255,0.6)" stroke-width="1.2"/><path d="M5 5.5c0-1.1.9-2 2-2s2 .9 2 2c0 .8-.5 1.5-1.2 1.8L7 9" stroke="rgba(255,255,255,0.6)" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="11" r="0.6" fill="rgba(255,255,255,0.6)"/></svg>
+              <span style="font-size:12px;color:rgba(255,255,255,0.55);">AI generation summary</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.5;"><path d="M2 2h10v10H2V2z" stroke="rgba(255,255,255,0.6)" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 6h6M4 8.5h4" stroke="rgba(255,255,255,0.6)" stroke-width="1.2" stroke-linecap="round"/></svg>
+              <span style="font-size:12px;color:rgba(255,255,255,0.55);">Save story</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Chat mockup -->
+      <div class="mockup-window reveal reveal-d1">
+        <div class="mockup-titlebar">
+          <div class="dot" style="background:#ff5f57;"></div>
+          <div class="dot" style="background:#febc2e;"></div>
+          <div class="dot" style="background:#28c840;"></div>
+        </div>
+        <div style="padding:20px 18px;display:flex;flex-direction:column;gap:10px;min-height:200px;">
+          <div class="chat-msg chat-user">Help me write a compelling intro for my article about productivity...</div>
+          <div class="chat-msg chat-ai">Here's a powerful opening that pulls the reader in immediately:<br><br>"Every morning, you make a choice..."</div>
+          <div class="chat-msg chat-user">Make it shorter and more direct.</div>
+          <div class="chat-msg chat-ai" style="opacity:0.7;">Refined version: "You don't need more hours. You need better focus."</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Three feature cards -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+      <div class="card reveal">
+        <div class="icon-box" style="margin-bottom:16px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="h3" style="font-size:15px;">Time Unfolded</h3>
+        <p class="body-text" style="font-size:13px;">Automated tasks and modern hours allow you to work deeper while AI handles the peripheral burden.</p>
+      </div>
+      <div class="card reveal reveal-d1">
+        <div class="icon-box" style="margin-bottom:16px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3.5h12M2 6.5h8M2 9.5h10M2 12.5h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="h3" style="font-size:15px;">Words that Flow</h3>
+        <p class="body-text" style="font-size:13px;">Drafts, blogs, and emails perfected with the eloquence and speed of language without the struggle.</p>
+      </div>
+      <div class="card reveal reveal-d2">
+        <div class="icon-box" style="margin-bottom:16px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L9.5 5.5H13L10 7.5l1.5 3.5L8 9l-3.5 2 1.5-3.5-3-2h3.5L8 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 class="h3" style="font-size:15px;">A Silent Guide</h3>
+        <p class="body-text" style="font-size:13px;">Privacy powered by design — your thoughts, your words, always secured and never harvested.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ USE CASES (Different paths) -->
+<section style="background:#000;border-top:1px solid rgba(255,255,255,0.06);">
+  <div class="section">
+
+    <h2 class="h1 reveal" style="max-width:500px;margin-bottom:40px;">
+      Different paths to <em>explore,</em><br>guided by one silent companion.
+    </h2>
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:36px;" class="reveal">
+      <button class="tab-btn active" onclick="setTab(this, 0)">Content Creation</button>
+      <button class="tab-btn" onclick="setTab(this, 1)">Coding Help</button>
+      <button class="tab-btn" onclick="setTab(this, 2)">Research &amp; Insights</button>
+      <button class="tab-btn" onclick="setTab(this, 3)">Focus &amp; Productivity</button>
+    </div>
+
+    <!-- Tab content panels -->
+    <div id="tab-panels">
+      <!-- Panel 0 -->
+      <div class="tab-panel" style="display:grid;grid-template-columns:1.4fr 1fr;gap:48px;align-items:center;">
+        <div class="mockup-window reveal" style="overflow:hidden;position:relative;">
+          <div class="mockup-titlebar" style="position:relative;z-index:2;">
+            <div class="dot" style="background:#ff5f57;"></div>
+            <div class="dot" style="background:#febc2e;"></div>
+            <div class="dot" style="background:#28c840;"></div>
+            <span style="margin-left:8px;font-size:11px;color:rgba(255,255,255,0.25);">Content Creation</span>
+          </div>
+          <!-- Dark atmospheric bg in mockup -->
+          <div style="position:relative;min-height:220px;">
+            <div style="position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=60&auto=format&fit=crop&crop=center');background-size:cover;background-position:center 40%;filter:brightness(0.18) saturate(0.08);"></div>
+            <div style="position:absolute;inset:0;background:radial-gradient(ellipse 200px 150px at 50% 80%, rgba(200,185,155,0.12) 0%, transparent 65%);"></div>
+            <div style="position:relative;z-index:2;padding:20px;">
+              <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:10px;">Draft · Blog Post · Article</div>
+              <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:16px;">"The future of work isn't about doing more — it's about doing what matters."</div>
+              <div style="height:1px;background:rgba(255,255,255,0.06);margin:12px 0;"></div>
+              <div style="display:flex;gap:6px;">
+                <span style="font-size:10px;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.08);">Blog Post</span>
+                <span style="font-size:10px;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.08);">Social Copy</span>
+                <span style="font-size:10px;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.08);">Newsletter</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="reveal reveal-d1">
+          <p style="font-size:16px;font-weight:400;color:rgba(255,255,255,0.8);line-height:1.55;margin-bottom:24px;">Bring stories, posts, and ideas to life with words that flow naturally.</p>
+          <a href="#" class="btn btn-outline" style="font-size:13px;">Get Started</a>
+        </div>
+      </div>
+
+      <!-- Panel 1 (hidden) -->
+      <div class="tab-panel" style="display:none;grid-template-columns:1.4fr 1fr;gap:48px;align-items:center;">
+        <div class="mockup-window">
+          <div class="mockup-titlebar">
+            <div class="dot" style="background:#ff5f57;"></div><div class="dot" style="background:#febc2e;"></div><div class="dot" style="background:#28c840;"></div>
+            <span style="margin-left:8px;font-size:11px;color:rgba(255,255,255,0.25);">Code Assistant</span>
+          </div>
+          <div style="padding:20px;font-family:monospace;font-size:11px;color:rgba(255,255,255,0.6);line-height:1.7;">
+            <span style="color:rgba(255,100,100,0.8);">function</span> <span style="color:rgba(200,200,100,0.8);">optimizeQuery</span>(data) {<br>
+            &nbsp;&nbsp;<span style="color:rgba(100,180,255,0.8);">return</span> data.filter(item => item.active)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;.sort((a, b) => b.score - a.score);<br>
+            }
+          </div>
+        </div>
+        <div>
+          <p style="font-size:16px;font-weight:400;color:rgba(255,255,255,0.8);line-height:1.55;margin-bottom:24px;">Debug, refactor, and build with a coding companion that understands context.</p>
+          <a href="#" class="btn btn-outline">Get Started</a>
+        </div>
+      </div>
+
+      <!-- Panel 2 (hidden) -->
+      <div class="tab-panel" style="display:none;grid-template-columns:1.4fr 1fr;gap:48px;align-items:center;">
+        <div class="mockup-window">
+          <div class="mockup-titlebar">
+            <div class="dot" style="background:#ff5f57;"></div><div class="dot" style="background:#febc2e;"></div><div class="dot" style="background:#28c840;"></div>
+            <span style="margin-left:8px;font-size:11px;color:rgba(255,255,255,0.25);">Research</span>
+          </div>
+          <div style="padding:20px;display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:12px;color:rgba(255,255,255,0.5);padding:10px;background:rgba(255,255,255,0.04);border-radius:8px;">📊 Market size: $4.2B growing at 28% CAGR</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.5);padding:10px;background:rgba(255,255,255,0.04);border-radius:8px;">🎯 Key competitors: 12 identified</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.5);padding:10px;background:rgba(255,255,255,0.04);border-radius:8px;">💡 Opportunity: Underserved SMB segment</div>
+          </div>
+        </div>
+        <div>
+          <p style="font-size:16px;font-weight:400;color:rgba(255,255,255,0.8);line-height:1.55;margin-bottom:24px;">Synthesize complex information into clear, actionable insights instantly.</p>
+          <a href="#" class="btn btn-outline">Get Started</a>
+        </div>
+      </div>
+
+      <!-- Panel 3 (hidden) -->
+      <div class="tab-panel" style="display:none;grid-template-columns:1.4fr 1fr;gap:48px;align-items:center;">
+        <div class="mockup-window">
+          <div class="mockup-titlebar">
+            <div class="dot" style="background:#ff5f57;"></div><div class="dot" style="background:#febc2e;"></div><div class="dot" style="background:#28c840;"></div>
+            <span style="margin-left:8px;font-size:11px;color:rgba(255,255,255,0.25);">Focus Mode</span>
+          </div>
+          <div style="padding:20px;">
+            <div style="text-align:center;padding:20px;color:rgba(255,255,255,0.6);">
+              <div style="font-size:32px;font-weight:300;letter-spacing:-0.02em;color:#fff;margin-bottom:4px;">25:00</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.3);">Deep Work Session</div>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.06);margin:12px 0;"></div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.4);">Next: 5 min break · 3 sessions left today</div>
+          </div>
+        </div>
+        <div>
+          <p style="font-size:16px;font-weight:400;color:rgba(255,255,255,0.8);line-height:1.55;margin-bottom:24px;">Stay in flow with intelligent session management and distraction blocking.</p>
+          <a href="#" class="btn btn-outline">Get Started</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ HOW IT WORKS -->
+<section style="background:#000;border-top:1px solid rgba(255,255,255,0.06);">
+  <div class="section">
+
+    <!-- Label -->
+    <div class="section-label reveal">How it Works</div>
+
+    <h2 class="h1 reveal" style="max-width:440px;margin-bottom:56px;">
+      One prompt to begin,<br><em>three steps to clarity.</em>
+    </h2>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start;">
+
+      <!-- Left: phone mockup with dark atmospheric background -->
+      <div class="reveal" style="position:relative;">
+        <div style="background:#0a0a0a;border:1px solid rgba(255,255,255,0.1);border-radius:32px;overflow:hidden;max-width:300px;margin:0 auto;position:relative;">
+          <!-- Notch bar -->
+          <div style="height:28px;background:#0a0a0a;display:flex;align-items:center;justify-content:center;position:relative;z-index:2;">
+            <div style="width:54px;height:4px;background:rgba(255,255,255,0.12);border-radius:2px;"></div>
+          </div>
+          <!-- Dark atmospheric bg inside phone -->
+          <div style="position:relative;min-height:360px;overflow:hidden;">
+            <div style="position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=70&auto=format&fit=crop&crop=center');background-size:cover;background-position:center;filter:brightness(0.2) saturate(0.1);"></div>
+            <div style="position:absolute;inset:0;background:radial-gradient(ellipse 120px 180px at 50% 65%, rgba(200,185,155,0.18) 0%, transparent 60%);"></div>
+            <!-- UI overlay -->
+            <div style="position:relative;z-index:2;padding:16px 16px 20px;">
+              <div style="text-align:center;margin-bottom:16px;">
+                <div style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px;">Message AI</div>
+                <div style="font-size:12px;color:rgba(255,255,255,0.6);">How can I help you today?</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="padding:8px 12px;background:rgba(255,255,255,0.08);border-radius:10px 10px 2px 10px;font-size:11px;color:rgba(255,255,255,0.75);align-self:flex-end;max-width:80%;">Write a pitch for my startup idea</div>
+                <div style="padding:8px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px 10px 10px 2px;font-size:11px;color:rgba(255,255,255,0.6);max-width:90%;">I'd love to help. What problem are you solving?</div>
+                <div style="padding:8px 12px;background:rgba(255,255,255,0.08);border-radius:10px 10px 2px 10px;font-size:11px;color:rgba(255,255,255,0.75);align-self:flex-end;max-width:80%;">AI tools for non-technical founders</div>
+                <div style="padding:8px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px 10px 10px 2px;font-size:11px;color:rgba(255,255,255,0.6);max-width:95%;opacity:0.9;">"For founders who build products, not code."</div>
+              </div>
+              <div style="margin-top:16px;display:flex;align-items:center;gap:6px;padding:7px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:999px;">
+                <span style="font-size:10px;color:rgba(255,255,255,0.25);flex:1;">Message...</span>
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 7l12-6-6 12-1.5-4.5L1 7z" stroke="rgba(255,255,255,0.35)" stroke-width="1.2" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: steps -->
+      <div class="reveal reveal-d1">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <div style="font-size:15px;font-weight:500;color:#fff;margin-bottom:6px;">Call</div>
+            <p class="body-text" style="font-size:13px;">Take to submit your request — a thought, a task, a question. Any input becomes the beginning.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <div style="font-size:15px;font-weight:500;color:#fff;margin-bottom:6px;">Awaken</div>
+            <p class="body-text" style="font-size:13px;">The assistant receives that answer, shaping text or insight in seconds, with precision.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <div style="font-size:15px;font-weight:500;color:#fff;margin-bottom:6px;">Embrace</div>
+            <p class="body-text" style="font-size:13px;">Take the response, refine it, use it. From first stroke to swift ease, every result is yours.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ BENEFITS (Security) -->
+<section style="background:#000;border-top:1px solid rgba(255,255,255,0.06);">
+  <div class="section">
+
+    <div class="section-label reveal">Security</div>
+
+    <h2 class="h1 reveal" style="max-width:580px;margin-bottom:56px;">
+      Invisible power at your side delivering<br><em>tangible benefits every day.</em>
+    </h2>
+
+    <!-- 3-col grid top -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;">
+      <div class="card reveal">
+        <div class="icon-box" style="margin-bottom:16px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 8h6M8 5v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="h3" style="font-size:15px;">Time Returned</h3>
+        <p class="body-text" style="font-size:13px;">Automate the routine and reclaim your hours for the work that actually moves the needle.</p>
+      </div>
+      <div class="card reveal reveal-d1">
+        <div class="icon-box" style="margin-bottom:16px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 7h7M3 10h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="h3" style="font-size:15px;">Words with Ease</h3>
+        <p class="body-text" style="font-size:13px;">Your thoughts, now polished and precise. No more staring at blank pages or second-guessing tone.</p>
+      </div>
+      <div class="card reveal reveal-d2">
+        <div class="icon-box" style="margin-bottom:16px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.2"/></svg>
+        </div>
+        <h3 class="h3" style="font-size:15px;">Guided Focus</h3>
+        <p class="body-text" style="font-size:13px;">Stay sharp and on target with an AI that helps you prioritize, plan, and execute with clarity.</p>
+      </div>
+    </div>
+
+    <!-- 3-col grid bottom -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+      <div class="card reveal">
+        <div class="icon-box" style="margin-bottom:16px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v2M8 12v2M2 8h2M12 8h2M4.22 4.22l1.42 1.42M10.36 10.36l1.42 1.42M4.22 11.78l1.42-1.42M10.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="h3" style="font-size:15px;">Instant Knowledge</h3>
+        <p class="body-text" style="font-size:13px;">Condense research and insights into clear, actionable summaries within seconds.</p>
+      </div>
+      <div class="card reveal reveal-d1">
+        <div class="icon-box" style="margin-bottom:16px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3C5.24 3 3 5.24 3 8s2.24 5 5 5 5-2.24 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M11 2v4h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 class="h3" style="font-size:15px;">Always Available</h3>
+        <p class="body-text" style="font-size:13px;">Your silent partner ready to help whenever you need it — no downtime, no delays.</p>
+      </div>
+      <div class="card reveal reveal-d2">
+        <div class="icon-box" style="margin-bottom:16px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L3 5v4c0 2.76 2.14 5.34 5 6 2.86-.66 5-3.24 5-6V5L8 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 class="h3" style="font-size:15px;">Built-in Trust</h3>
+        <p class="body-text" style="font-size:13px;">Protected by design — your data, your ideas, always secure and never shared.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ TESTIMONIALS -->
+<section style="background:#000;border-top:1px solid rgba(255,255,255,0.06);" id="testimonials">
+  <div class="section">
+
+    <div class="section-label reveal">Testimonials</div>
+
+    <h2 class="h1 reveal" style="max-width:480px;margin-bottom:56px;">
+      What others <em>whisper</em><br>about the experience
+    </h2>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+
+      <div class="test-card reveal">
+        <p class="test-text">"I've tested countless AI tools, but this one feels different — less like software, more like a guide that clears the fog in my projects."</p>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+          <div>
+            <div class="test-author">Sophia M.</div>
+            <div class="test-role">Product Designer</div>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.2);">★★★★★</div>
+        </div>
+      </div>
+
+      <div class="test-card reveal reveal-d1">
+        <p class="test-text">"Within days, it streamlined my workflow. The balance of precision and inspiration it offers is unlike anything I've seen."</p>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+          <div>
+            <div class="test-author">David K.</div>
+            <div class="test-role">Startup Founder</div>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.2);">★★★★★</div>
+        </div>
+      </div>
+
+      <div class="test-card reveal reveal-d2">
+        <p class="test-text">"At first I was skeptical. But the clarity it brings into complex problems feels almost like working with a second brain."</p>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+          <div>
+            <div class="test-author">Aria L.</div>
+            <div class="test-role">UX Researcher</div>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.2);">★★★★★</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ PRICING -->
+<section style="background:#000;border-top:1px solid rgba(255,255,255,0.06);" id="pricing">
+  <div class="section">
+
+    <div class="section-label reveal">Pricing</div>
+
+    <h2 class="h1 reveal" style="max-width:500px;margin-bottom:10px;">
+      Choose the plan that<br><em>matches your ambition</em>
+    </h2>
+
+    <!-- Toggle -->
+    <div class="reveal" style="display:flex;align-items:center;gap:8px;margin-bottom:48px;margin-top:24px;">
+      <button class="toggle-pill active" onclick="this.classList.add('active');this.nextElementSibling.classList.remove('active')">Monthly</button>
+      <button class="toggle-pill" onclick="this.classList.add('active');this.previousElementSibling.classList.remove('active')">Yearly</button>
+      <span style="font-size:11px;font-weight:600;color:var(--lime);background:rgba(232,255,156,0.1);border:1px solid rgba(232,255,156,0.25);padding:4px 10px;border-radius:999px;letter-spacing:0.02em;">30% off</span>
+    </div>
+
+    <!-- Plans -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+
+      <!-- Starter -->
+      <div class="pricing-card reveal">
+        <div style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.4);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:16px;">Starter</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:6px;">
+          <span class="price-amount">$0</span>
+        </div>
+        <div class="price-period" style="margin-bottom:24px;">Free forever</div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.6;margin-bottom:28px;">Perfect for explore it with essential tools for individuals and small projects.</p>
+        <a href="#" style="display:flex;align-items:center;justify-content:center;width:100%;padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:transparent;font-size:13px;font-weight:500;color:#fff;text-decoration:none;margin-bottom:28px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">Start for Free</a>
+        <hr style="margin-bottom:24px;">
+        <div class="feature-check">Basic access to AI core</div>
+        <div class="feature-check">Limited prompts per month</div>
+        <div class="feature-check">Community support</div>
+      </div>
+
+      <!-- Pro -->
+      <div class="pricing-card popular reveal reveal-d1">
+        <div class="popular-badge">Popular</div>
+        <div style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.4);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:16px;">Pro</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:6px;">
+          <span class="price-amount">$29</span>
+          <span class="price-period">/mo</span>
+        </div>
+        <div class="price-period" style="margin-bottom:24px;">Billed monthly</div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.6;margin-bottom:28px;">Advanced features and flexibility to scale your creative and strategic workflows.</p>
+        <a href="#" style="display:flex;align-items:center;justify-content:center;width:100%;padding:11px;border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:#000;text-decoration:none;margin-bottom:28px;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Upgrade to Pro</a>
+        <hr style="margin-bottom:24px;">
+        <div class="feature-check">Unlimited prompts</div>
+        <div class="feature-check">Priority response time</div>
+        <div class="feature-check">Early access to new features</div>
+        <div class="feature-check">Advanced workflows</div>
+      </div>
+
+      <!-- Lifetime -->
+      <div class="pricing-card reveal reveal-d2">
+        <div style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.4);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:16px;">Lifetime</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:6px;">
+          <span class="price-amount" style="font-size:32px;">Custom</span>
+        </div>
+        <div class="price-period" style="margin-bottom:24px;">One-time payment</div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.6;margin-bottom:28px;">For teams and power users who want everything, forever, with white-glove onboarding.</p>
+        <a href="#" style="display:flex;align-items:center;justify-content:center;width:100%;padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:transparent;font-size:13px;font-weight:500;color:#fff;text-decoration:none;margin-bottom:28px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">Contact Sales</a>
+        <hr style="margin-bottom:24px;">
+        <div class="feature-check">Everything in Pro</div>
+        <div class="feature-check">Custom integrations</div>
+        <div class="feature-check">Dedicated account manager</div>
+        <div class="feature-check">Team collaboration tools</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ FAQ -->
+<section style="background:#000;border-top:1px solid rgba(255,255,255,0.06);" id="faq">
+  <div class="section">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;">
+
+      <!-- Left: heading -->
+      <div>
+        <div class="section-label reveal">FAQ</div>
+        <h2 class="h1 reveal" style="max-width:380px;">
+          Your questions,<br><em>answered</em> with clarity
+        </h2>
+      </div>
+
+      <!-- Right: accordions -->
+      <div class="reveal" style="padding-top:8px;">
+        <details open>
+          <summary>
+            What is this AI platform designed for?
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-answer">Message is designed for creators, writers, developers, and professionals who want to think faster, work smarter, and produce better output with the help of AI — without needing any technical background.</div>
+        </details>
+
+        <details>
+          <summary>
+            Do I need technical knowledge to use it?
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-answer">Not at all. Message is built for everyone. The interface is intuitive and conversational — just type naturally and the AI handles the complexity behind the scenes.</div>
+        </details>
+
+        <details>
+          <summary>
+            Which AI models power the tool?
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-answer">Message uses a combination of leading large language models, optimized and fine-tuned for different task types. We continuously update the models to deliver the best results.</div>
+        </details>
+
+        <details>
+          <summary>
+            Is there a free plan available?
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-answer">Yes. Our Starter plan is free forever with access to the core AI features. You can upgrade to Pro at any time to unlock unlimited usage and advanced capabilities.</div>
+        </details>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════ CTA BOTTOM -->
+<div style="padding:0 40px 80px;max-width:1280px;margin:0 auto;">
+  <div class="cta-section">
+    <div class="cta-bg"></div>
+    <div class="cta-overlay"></div>
+    <div style="position:relative;z-index:2;max-width:520px;text-align:center;">
+      <h2 class="h1" style="margin-bottom:16px;font-size:clamp(32px,4vw,52px);">
+        Step into the future,<br><em>guided by AI clarity</em>
+      </h2>
+      <p style="font-size:15px;color:rgba(255,255,255,0.5);margin-bottom:32px;line-height:1.6;">Experience the tool right now. Just dive in and see what AI can do for you.</p>
+      <a href="#" class="btn btn-outline" style="font-size:14px;padding:10px 28px;">Try it Now</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════ FOOTER -->
+<footer class="footer" style="max-width:1280px;margin:0 auto;">
+  <div style="display:grid;grid-template-columns:1fr repeat(3,auto);gap:80px;align-items:start;margin-bottom:60px;">
+
+    <!-- Brand -->
+    <div>
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px;">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect width="18" height="18" rx="5" fill="rgba(255,255,255,0.1)"/>
+          <path d="M4 6h10M4 9h7M4 12h5" stroke="rgba(255,255,255,0.5)" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        <span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.8);">Message</span>
+      </div>
+      <p style="font-size:13px;color:rgba(255,255,255,0.3);line-height:1.6;max-width:200px;">Where thoughts become actions.</p>
+      <div style="display:flex;gap:12px;margin-top:20px;">
+        <a href="#" style="width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.4);font-size:12px;text-decoration:none;">𝕏</a>
+        <a href="#" style="width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.4);font-size:12px;text-decoration:none;">in</a>
+      </div>
+    </div>
+
+    <!-- Product -->
+    <div>
+      <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px;">Product</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <a href="#" style="font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;">Features</a>
+        <a href="#" style="font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;">Pricing</a>
+        <a href="#" style="font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;">Changelog</a>
+        <a href="#" style="font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;">Roadmap</a>
+      </div>
+    </div>
+
+    <!-- Company -->
+    <div>
+      <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px;">Company</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <a href="#" style="font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;">About</a>
+        <a href="#" style="font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;">Blog</a>
+        <a href="#" style="font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;">Careers</a>
+      </div>
+    </div>
+
+    <!-- Legal -->
+    <div>
+      <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px;">Legal</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <a href="#" style="font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;">Privacy</a>
+        <a href="#" style="font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;">Terms</a>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding-top:24px;flex-wrap:wrap;gap:12px;">
+    <p style="font-size:12px;color:rgba(255,255,255,0.2);">© 2025 Message Inc. All rights reserved.</p>
+    <p style="font-size:12px;color:rgba(255,255,255,0.2);">Built with ♥ for thinkers everywhere</p>
+  </div>
+</footer>
+
+
+<!-- ══════════════════════════════════════════ JS -->
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.1, rootMargin: '0px 0px -32px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Tabs
+  function setTab(btn, idx) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach((p, i) => {
+      p.style.display = i === idx ? 'grid' : 'none';
+    });
+  }
+
+  // Toggle pricing
+  document.querySelectorAll('.toggle-opt').forEach((opt, i) => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.toggle-opt').forEach(o => o.classList.remove('active'));
+      opt.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
